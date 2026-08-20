@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "perfect-goods-76shk",
+    "portfolio": "jubin-portfolio"
+  },
+  "targets": {
+    "perfect-goods-76shk": {
+      "hosting": {
+        "mr-jubin-site": [
+          "mr-jubin-site"
+        ]
+      }
+    }
+  }
+}

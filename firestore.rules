@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'jubinkuli009@gmail.com' ||
+        request.auth.token.email == 'jubinkuli72@gmail.com' ||
+        request.auth.token.email == 'admin@gmail.com' ||
+        request.auth.token.email == 'admin@jubin.dev' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidVisitor(data) {
+      return data.keys().hasAll(['fullName', 'email', 'phone', 'authProvider', 'registeredAt']) &&
+        data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100 &&
+        data.email is string && data.email.size() > 0 && data.email.size() <= 150 &&
+        data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 30 &&
+        data.authProvider is string && data.authProvider.size() <= 50 &&
+        data.registeredAt is string && data.registeredAt.size() <= 50 &&
+        (!('visitCount' in data) || (data.visitCount is int && data.visitCount >= 1)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('leadTag' in data) || (data.leadTag is string && data.leadTag.size() <= 50)) &&
+        (!('deviceInfo' in data) || (data.deviceInfo is string && data.deviceInfo.size() <= 300));
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Visitors Collection
+    match /visitors/{visitorId} {
+      allow get: if isSignedIn() && (isOwner(visitorId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && (isOwner(visitorId) || isAdmin()) && isValidVisitor(incoming());
+      allow update: if isSignedIn() && (
+        (isOwner(visitorId) && isValidVisitor(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['lastVisitedAt', 'visitCount', 'deviceInfo', 'phone', 'fullName', 'notes', 'leadTag'])) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // System connectivity check for authenticated clients
+    match /test/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

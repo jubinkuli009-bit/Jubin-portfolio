@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "visitor": {
+      "title": "Visitor",
+      "description": "Compulsory recorded portfolio visitor details including contact email, valid phone number, and telemetry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Unique identifier of the visitor (Auth UID)" },
+        "fullName": { "type": "string", "maxLength": 100, "description": "Visitor full name" },
+        "email": { "type": "string", "format": "email", "maxLength": 150, "description": "Visitor email address" },
+        "phone": { "type": "string", "maxLength": 30, "description": "Compulsory verified phone number with country code" },
+        "authProvider": { "type": "string", "maxLength": 50, "description": "Authentication method (google.com or password)" },
+        "photoUrl": { "type": "string", "maxLength": 500, "description": "Profile picture URL" },
+        "registeredAt": { "type": "string", "maxLength": 50, "description": "Timestamp when visitor registered" },
+        "lastVisitedAt": { "type": "string", "maxLength": 50, "description": "Timestamp of most recent visit" },
+        "visitCount": { "type": "integer", "description": "Total number of visits logged" },
+        "deviceInfo": { "type": "string", "maxLength": 300, "description": "Browser / OS environment info" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Admin notes on this visitor lead" },
+        "leadTag": { "type": "string", "maxLength": 50, "description": "Lead classification tag" }
+      },
+      "required": ["fullName", "email", "phone", "authProvider", "registeredAt"]
+    },
+    "admin": {
+      "title": "Admin",
+      "description": "Administrator account definitions",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "role": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/visitors/{visitorId}": {
+      "schema": "visitor",
+      "description": "Collection of compulsory recorded portfolio visitor profiles"
+    },
+    "/admins/{adminId}": {
+      "schema": "admin",
+      "description": "Collection of trusted administrators"
+    }
+  }
+}

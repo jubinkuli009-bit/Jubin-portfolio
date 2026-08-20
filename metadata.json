@@ -1,0 +1,6 @@
+{
+  "name": "JUBIN",
+  "description": "Mr. Jubin portfolio with 3d World — An interactive 2D/3D/4D website developed by Mr. Jubin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
